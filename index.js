@@ -33,6 +33,7 @@ const pdfStorage = multer.diskStorage({
 const pdfUpload = multer({
     storage: pdfStorage,
     fileFilter: function fileFilter(req, file, cb) {
+        console.log(file.mimetype);
         file.mimetype.split('/')[1] === 'pdf' ? cb(null, true) : cb(null, false);
     }
 });
@@ -57,6 +58,7 @@ const imageStorage = multer.diskStorage({
 const imageUpload = multer({
     storage: imageStorage,
     fileFilter: function fileFilter(req, file, cb) {
+        console.log(file.mimetype);
         file.mimetype.split('/')[0] === 'image' ? cb(null, true) : cb(null, false);
     }
 });
@@ -67,13 +69,14 @@ app.get('/images', function (req, res) {
 
 app.post('/images', imageUpload.single('image'), async (req, res, next) => {
     let currFile = req.file.filename.slice(0, 37) ;
+    let rash = req.file.filename.split('.')[1];
     let filenames = [
-        currFile,
-        currFile + 'preview',
-        currFile + 'thumbnail'
+        currFile + 'master.'    + rash,
+        currFile + 'preview.'   + rash,
+        currFile + 'thumbnail.' + rash
     ];
-    await sharp('./uploads/images/' + req.file.filename).resize(800, 600).toFile('./uploads/images/' + filenames[0]);
-    await sharp('./uploads/images/' + req.file.filename).resize(300, 180).toFile('./uploads/images/' + filenames[1]);
+    await sharp('./uploads/images/' + req.file.filename).resize(800, 600).toFile('./uploads/images/' + filenames[1]);
+    await sharp('./uploads/images/' + req.file.filename).resize(300, 180).toFile('./uploads/images/' + filenames[2]);
     res.json(filenames);
 });
 
